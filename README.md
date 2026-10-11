@@ -59,3 +59,60 @@ Notes:
 - I did not set up Cloudflare. The app works on the frontend alb link.
 - SSH was blocked on my office network, so I used EC2 Instance Connect.
 - .env is not pushed to gitHub because it has the DB password.
+
+  ## Screenshots
+
+### Architecture
+![](Images/architecture-diagram.png)
+
+### MongoDB Atlas
+![](Images/01-atlas-cluster.png)
+![](Images/02-atlas-db-user.png)
+![](Images/03-atlas-ip-access.png)
+
+### EC2 and security group
+![](Images/04-ec2-instances.png)
+![](Images/05-security-group.png)
+![](Images/06-key-pair.png)
+
+### Backend setup
+![](Images/07-os-version.png)
+![](Images/08-node-version.png)
+![](Images/09-backend-files.png)
+![](Images/12-systemd-status.png)
+![](Images/13-curl-hello-systemd.png)
+![](Images/15-browser-hello.png)
+![](Images/16-after-reboot.png)
+
+### Frontend setup
+![](Images/17-frontend-os.png)
+![](Images/18-frontend-swap.png)
+![](Images/19-frontend-url-js.png)
+![](Images/20-frontend-build.png)
+
+### Testing
+![](Images/22-app-homepage.png)
+![](Images/23-add-experience-form.jpeg)
+![](Images/24-trip-listed.png)
+![](Images/25-atlas-data.png)
+
+### AMIs and second instances
+![](Images/26-amis-available.png)
+![](Images/27-four-instances.png)
+![](Images/28-backend-2-hello.png)
+![](Images/29-frontend-2-app.png)
+
+### Backend load balancer
+![](Images/30-backend-tg.png)
+![](Images/31-backend-targets-healthy.png.png)
+![](Images/32-backend-alb-hello.png)
+
+### Frontend load balancer
+![](Images/33-frontend-tg.png)
+![](Images/34-frontend-targets-healthy.png)
+![](Images/35-frontend-alb-app.png)
+
+### Frontend pointing to backend ALB
+![](Images/36-url-js-alb.png)
+![](Images/37-final-app-via-alb.png)
+![](Images/38-network-tab-backend-alb.png)
