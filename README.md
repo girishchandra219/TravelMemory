@@ -1,49 +1,61 @@
-# Travel Memory
+Travel Memory app on AWS:
+I deployed the Travel Memory app on aws ec2 with 2 backend and 2 frontend servers, each pair behind a load balancer. The database is mongodb atlas.
+Link: http://travelmemory-frontend-alb-123265019.us-east-1.elb.amazonaws.com
 
-`.env` file to work with the backend after creating a database in mongodb: 
+Architecture:
+Region is us-east-1. Master ec2 are in us-east-1d and the replicas are in us-east-1b.
 
-```
-MONGO_URI='ENTER_YOUR_URL'
-PORT=3001
-```
+Step 1 - Mongodb atlas:
+Created a cluster on gui, a user, and allowed 0.0.0.0/0 in network access.
 
-Data format to be added: 
+Step 2 - ec2 instances:
+Launched backend-master and frontend-master. Security group allows ports 22, 80 and 3000.
 
-```json
-{
-    "tripName": "Incredible India",
-    "startDateOfJourney": "19-03-2022",
-    "endDateOfJourney": "27-03-2022",
-    "nameOfHotels":"Hotel Namaste, Backpackers Club",
-    "placesVisited":"Delhi, Kolkata, Chennai, Mumbai",
-    "totalCost": 800000,
-    "tripType": "leisure",
-    "experience": "Lorem Ipsum, Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum,Lorem Ipsum, ",
-    "image": "https://t3.ftcdn.net/jpg/03/04/85/26/360_F_304852693_nSOn9KvUgafgvZ6wM0CNaULYUa7xXBkA.jpg",
-    "shortDescription":"India is a wonderful country with rich culture and good people.",
-    "featured": true
-}
-```
-
-
-For frontend, you need to create `.env` file and put the following content (remember to change it based on your requirements):
-```bash
-REACT_APP_BACKEND_URL=http://localhost:3001
-```
-
-## How to run BE
-
-Note: Make sure you have the .env file already added
-```bash
-cd backend
+Step 3 - Backend:
+sudo apt update
+sudo apt install -y nodejs npm git nginx
+git clone https://github.com/UnpredictablePrashant/TravelMemory.git
+cd TravelMemory/backend
 npm install
-node index.js
-```
+-----------------------------------------------
+Created .env:
+MONGO_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/travelmemory
+PORT=3000
+-----------------------------------------------
+sudo systemctl daemon-reload
+sudo systemctl enable --now travelmemory-backend
+-----------------------------------------------
+Set up nginx as a reverse proxy port 80 to 3000. File: deployment/nginx-backend.conf
 
-## How to run FE
-Note: Make sure you have the .env file already added
-```bash
-cd frontend
+Step 4 - Frontend: 
+Installed the same packages, added 2GB swap (to make sure memory shouldn't max out) and cloned the repo and set the backend IP in src/url.js.
+-----------------------------------------------
 npm install
-npm start
-```
+npm run build
+sudo rm -rf /var/www/html/*
+sudo cp -r build/* /var/www/html/
+-----------------------------------------------
+Nginx config: deployment/nginx-frontend.conf
+
+Step 5 - Testing before ami: 
+Added a trip from the form and checked it in the app and in Atlas.
+
+Step 6 and 7 - amis and second instances: 
+Created amis from both masters and launched backend-2 and frontend-2 from them in a different zone. backend-2 worked without logging in because of systemd.
+
+Step 8 - backend load balancer
+Target group with health check /hello, both backend servers registered, alb listening on port 80.
+
+Step 9 - frontend load balancer
+Same thing for the frontend, health check /.
+
+Step 10 - frontend pointing to backend alb
+Changed src/url.js on both frontend servers to the backend ALB address, rebuilt and copied again.
+-----------------------------------------------
+export const baseUrl = "http://travelmemory-backend-alb-362367303.us-east-1.elb.amazonaws.com";
+-----------------------------------------------
+
+Notes:
+- I did not set up Cloudflare. The app works on the frontend alb link.
+- SSH was blocked on my office network, so I used EC2 Instance Connect.
+- .env is not pushed to gitHub because it has the DB password.
